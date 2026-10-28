@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NovaBank | Banking Management System</title>
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Arial,sans-serif;background:#f3f5fc;color:#242747}
+header{background:linear-gradient(120deg,#211b50,#5746bd);color:white;padding:25px 6%;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:15px}
+header h1{font-size:28px}
+header p{margin-top:8px;color:#d9d5ff;font-size:13px}
+main{max-width:1200px;margin:30px auto;padding:0 20px}
+.welcome{display:flex;justify-content:space-between;align-items:center;gap:15px;flex-wrap:wrap}
+.welcome p{color:#8189a2;margin-top:8px}
+button{border:none;padding:12px 16px;border-radius:9px;cursor:pointer;font-weight:bold;background:#efedff;color:#5142c5}
+button:hover{opacity:.85}
+.primary{background:#6958e7;color:white}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:17px;margin:25px 0}
+.card,.panel{background:white;padding:23px;border-radius:15px;box-shadow:0 5px 22px #25294b0b;border:1px solid #e9ebf4}
+.card p{color:#838ba2;font-size:13px}
+.card h2{margin-top:16px;font-size:25px;overflow-wrap:anywhere}
+.highlight{background:linear-gradient(130deg,#7667f0,#5141c3);color:white}
+.highlight p{color:#eeeaff}
+.layout{display:grid;grid-template-columns:1fr 1.5fr;gap:20px}
+.panel{margin-bottom:20px;min-width:0}
+.panel h2{font-size:19px;margin-bottom:18px}
+label{display:block;font-size:13px;font-weight:bold;margin:12px 0 7px}
+input{width:100%;padding:12px;border:1px solid #dfe3ee;border-radius:8px;margin-bottom:8px}
+input:focus{outline:2px solid #d4ceff}
+form button{width:100%;margin-top:8px}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:15px}
+.actions button{width:100%}
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13px;white-space:nowrap}
+th,td{text-align:left;padding:13px 10px;border-bottom:1px solid #edf0f6}
+th{color:#838ba2;font-size:11px;background:#fafaff}
+.message{margin-top:12px;font-size:13px;line-height:1.6;overflow-wrap:anywhere}
+.success{color:#12845a}
+.error{color:#cf3453}
+footer{text-align:center;padding:25px;color:#9299ad;font-size:12px}
+[hidden]{display:none!important}
+@media(max-width:750px){.layout{grid-template-columns:1fr}header h1{font-size:23px}main{padding:0 12px}.panel{padding:16px}.card{padding:17px}.card h2{font-size:20px}}
+</style>
+</head>
+
+<body>
+<header>
+  <div>
+    <h1>✦ NovaBank</h1>
+    <p>SMART BANKING MANAGEMENT SYSTEM</p>
+  </div>
+  <div>🔒 Student Mini Project</div>
+</header>
+
+<main>
+  <section class="welcome">
+    <div>
+      <h2>Welcome to Your Dashboard 👋</h2>
+      <p>Manage accounts, deposits, withdrawals and passbooks.</p>
+    </div>
+    <button class="primary" onclick="createAccount()">＋ Create Account</button>
+  </section>
+
+  <section class="cards">
+    <div class="card highlight">
+      <p>Total Bank Balance</p>
+      <h2 id="totalBalance">₹0.00</h2>
+    </div>
+    <div class="card">
+      <p>Total Accounts</p>
+      <h2 id="totalAccounts">0</h2>
+    </div>
+    <div class="card">
+      <p>Today's Deposits</p>
+      <h2 id="deposits">₹0.00</h2>
+    </div>
+    <div class="card">
+      <p>Today's Withdrawals</p>
+      <h2 id="withdrawals">₹0.00</h2>
+    </div>
+  </section>
+
+  <div class="layout">
+    <section>
+      <div class="panel">
+        <h2>💳 Banking Operations</h2>
+        <button onclick="depositMoney()">↓ Deposit Money</button>
+        <button onclick="withdrawMoney()">↑ Withdraw Money</button>
+        <button onclick="checkBalance()">◉ Check Balance</button>
+        <button onclick="showPassbook()">▤ Passbook</button>
+        <p id="operationMessage" class="message"></p>
+      </div>
+
+      <div class="panel">
+        <h2>＋ Open New Account</h2>
+        <form id="accountForm">
+          <label for="name">Account Holder Name</label>
+          <input id="name" maxlength="70" placeholder="Enter full name" required>
+
+          <label for="phone">Phone Number</label>
+          <input id="phone" maxlength="20" placeholder="Enter demo phone number" required>
+
+          <label for="opening">Opening Balance (₹)</label>
+          <input id="opening" type="number" min="0" step="0.01" value="1000" required>
+
+          <button class="primary" type="submit">Create Bank Account</button>
+        </form>
+        <p id="formMessage" class="message"></p>
+      </div>
+    </section>
+
+    <section>
+      <div class="panel">
+        <h2>👥 Bank Accounts</h2>
+        <input id="search" placeholder="Search name or account number..." oninput="renderAccounts()">
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>ACCOUNT NO.</th><th>NAME</th><th>BALANCE</th></tr></thead>
+            <tbody id="accountRows"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>📊 Transaction History</h2>
+        <label for="from">From Date</label>
+        <input type="date" id="from">
+        <label for="to">To Date</label>
+        <input type="date" id="to">
+        <button onclick="renderTransactions()">View Report</button>
+        <button onclick="clearDates()">Clear Dates</button>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>DATE</th><th>ACCOUNT</th><th>TYPE</th><th>AMOUNT</th><th>BALANCE</th></tr>
+            </thead>
+            <tbody id="transactionRows"></tbody>
+          </table>
+        </div>
+        <p id="reportMessage" class="message"></p>
+      </div>
+    </section>
+  </div>
+</main>
+
+<footer>NovaBank Mini Project | HTML • CSS • JavaScript<br>Educational demo only. Do not enter real banking information.</footer>
+
+<script>
+const STORAGE_KEY = "novaBankAccounts";
+let accounts = [];
+
+try {
+  const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+  accounts = Array.isArray(saved) ? saved : [];
+} catch (e) {
+  accounts = [];
+}
+
+function today() {
+  const d = new Date();
+  d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+  return d.toISOString().slice(0, 10);
+}
+
+function money(n) {
+  return new Intl.NumberFormat("en-IN", {
+    style: "currency",
+    currency: "INR"
+  }).format(n);
+}
+
+function saveData() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(accounts));
+  } catch (e) {
+    alert("Unable to save data in this browser.");
+  }
+}
+
+function escapeHTML(value) {
+  return String(value).replace(/[&<>"']/g, c => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;",
+    '"': "&quot;", "'": "&#39;"
+  })[c]);
+}
+
+function message(id, text, success = true) {
+  const el = document.getElementById(id);
+  el.textContent = text;
+  el.className = "message " + (success ? "success" : "error");
+}
+
+function createAccount() {
+  document.getElementById("name").focus();
+  document.getElementById("name").scrollIntoView({
+    behavior: "smooth",
+    block: "center"
+  });
+}
+
+document.getElementById("accountForm").addEventListener("submit", function(e) {
+  e.preventDefault();
+
+  const name = document.getElementById("name").value.trim();
+  const phone = document.getElementById("phone").value.trim();
+  const opening = Number(document.getElementById("opening").value);
+
+  if (!name || !phone || !Number.isFinite(opening) || opening < 0) {
+    message("formMessage", "Please enter valid details.", false);
+    return;
+  }
+
+  const number = Math.max(1000, ...accounts.map(a => a.number)) + 1;
+
+  const account = {
+    number,
+    name,
+    phone,
+    balance: opening,
+    withdrawalDate: today(),
+    withdrawnToday: 0,
+    transactions: []
+  };
+
+  addTransaction(account, "Account Created", opening);
+  accounts.push(account);
+
+  saveData();
+  this.reset();
+  document.getElementById("opening").value = 1000;
+  renderAll();
+
+  message("formMessage", "Account created successfully! Account number: " + number);
+});
+
+function selectAccount() {
+  if (!accounts.length) {
+    message("operationMessage", "Create an account first.", false);
+    return null;
+  }
+
+  const value = prompt(
+    "Enter account number:\n" +
+    accounts.map(a => a.number + " - " + a.name).join("\n")
+  );
+
+  if (value === null) return null;
+
+  const account = accounts.find(a => String(a.number) === value.trim());
+
+  if (!account) {
+    message("operationMessage", "Account not found.", false);
+    return null;
+  }
+
+  return account;
+}
+
+function addTransaction(account, type, amount) {
+  account.transactions.push({
+    date: today(),
+    type,
+    amount,
+    balance: account.balance
+  });
+}
+
+function depositMoney() {
+  const account = selectAccount();
+  if (!account) return;
+
+  const value = prompt("Enter deposit amount in ₹:");
+  if (value === null) return;
+  const amount = Number(value);
+
+  if (!Number.isFinite(amount) || amount <= 0) {
+    message("operationMessage", "Enter a valid amount greater than zero.", false);
+    return;
+  }
+
+  account.balance += amount;
+  addTransaction(account, "Deposit", amount);
+  saveData();
+  renderAll();
+
+  message("operationMessage", "Deposit successful! Balance: " + money(account.balance));
+}
+
+function withdrawMoney() {
+  const account = selectAccount();
+  if (!account) return;
+
+  const value = prompt("Enter withdrawal amount in ₹:");
+  if (value === null) return;
+  const amount = Number(value);
+
+  if (!Number.isFinite(amount) || amount <= 0) {
+    message("operationMessage", "Enter a valid amount greater than zero.", false);
+    return;
+  }
+
+  if (amount > account.balance) {
+    message("operationMessage", "Insufficient balance.", false);
+    return;
+  }
+
+  if (account.withdrawalDate !== today()) {
+    account.withdrawalDate = today();
+    account.withdrawnToday = 0;
+  }
+
+  if (account.withdrawnToday + amount > 10000) {
+    message("operationMessage", "Daily withdrawal limit is ₹10,000.", false);
+    return;
+  }
+
+  account.balance -= amount;
+  account.withdrawnToday += amount;
+  addTransaction(account, "Withdrawal", amount);
+  saveData();
+  renderAll();
+
+  message("operationMessage", "Withdrawal successful! Balance: " + money(account.balance));
+}
+
+function checkBalance() {
+  const account = selectAccount();
+  if (!account) return;
+
+  message(
+    "operationMessage",
+    account.name + " | Account: " + account.number +
+    " | Available Balance: " + money(account.balance)
+  );
+}
+
+function showPassbook() {
+  const account = selectAccount();
+  if (!account) return;
+
+  const from = prompt("From date (YYYY-MM-DD):", today());
+  if (from === null) return;
+  const to = prompt("To date (YYYY-MM-DD):", today());
+  if (to === null) return;
+
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(from) ||
+      !/^\d{4}-\d{2}-\d{2}$/.test(to) || from > to) {
+    message("operationMessage", "Enter valid dates in YYYY-MM-DD format.", false);
+    return;
+  }
+
+  const rows = account.transactions.filter(t => t.date >= from && t.date <= to);
+
+  const report = rows.map(t =>
+    t.date + " | " + t.type + " | " + money(t.amount) +
+    " | Balance: " + money(t.balance)
+  ).join("\n");
+
+  alert("PASSBOOK\nAccount: " + account.number + "\n\n" +
+    (report || "No transactions found."));
+}
+
+function renderAccounts() {
+  const query = document.getElementById("search").value.toLowerCase();
+
+  const filtered = accounts.filter(a =>
+    a.name.toLowerCase().includes(query) ||
+    String(a.number).includes(query)
+  );
+
+  document.getElementById("accountRows").innerHTML = filtered.length
+    ? filtered.map(a => `<tr>
+        <td>${a.number}</td>
+        <td>${escapeHTML(a.name)}</td>
+        <td>${money(a.balance)}</td>
+      </tr>`).join("")
+    : '<tr><td colspan="3">No accounts found.</td></tr>';
+}
+
+function renderTransactions() {
+  const from = document.getElementById("from").value;
+  const to = document.getElementById("to").value;
+
+  if (from && to && from > to) {
+    message("reportMessage", "From date must not be later than To date.", false);
+    return;
+  }
+
+  const rows = accounts.flatMap(a =>
+    a.transactions.map(t => ({
+      ...t,
+      number: a.number,
+      name: a.name
+    }))
+  ).filter(t => (!from || t.date >= from) && (!to || t.date <= to))
+   .sort((a, b) => b.date.localeCompare(a.date));
+
+  document.getElementById("transactionRows").innerHTML = rows.length
+    ? rows.map(t => `<tr>
+        <td>${t.date}</td>
+        <td>${escapeHTML(t.name)} (#${t.number})</td>
+        <td>${escapeHTML(t.type)}</td>
+        <td>${money(t.amount)}</td>
+        <td>${money(t.balance)}</td>
+      </tr>`).join("")
+    : '<tr><td colspan="5">No transactions found.</td></tr>';
+
+  message("reportMessage", rows.length + " transaction(s) found.");
+}
+
+function clearDates() {
+  document.getElementById("from").value = "";
+  document.getElementById("to").value = "";
+  renderTransactions();
+}
+
+function renderAll() {
+  document.getElementById("totalAccounts").textContent = accounts.length;
+
+  document.getElementById("totalBalance").textContent = money(
+    accounts.reduce((sum, a) => sum + a.balance, 0)
+  );
+
+  const todaysTransactions = accounts.flatMap(a => a.transactions)
+    .filter(t => t.date === today());
+
+  document.getElementById("deposits").textContent = money(
+    todaysTransactions.filter(t => t.type === "Deposit")
+      .reduce((sum, t) => sum + t.amount, 0)
+  );
+
+  document.getElementById("withdrawals").textContent = money(
+    todaysTransactions.filter(t => t.type === "Withdrawal")
+      .reduce((sum, t) => sum + t.amount, 0)
+  );
+
+  renderAccounts();
+  renderTransactions();
+}
+
+renderAll();
+</script>
+</body>
+</html>
